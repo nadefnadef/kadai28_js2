@@ -3,14 +3,14 @@ import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstati
 
 // Firebaseの設定
 const firebaseConfig = {
-    apiKey: "AIzaSyAIbDeSnXmTeabYBbpSnSbzfojnjG3KKck",
-    authDomain: "sample-c0906.firebaseapp.com",
-    databaseURL: "https://sample-c0906-default-rtdb.firebaseio.com",
-    projectId: "sample-c0906",
-    storageBucket: "sample-c0906.appspot.com",
-    messagingSenderId: "998441269743",
-    appId: "1:998441269743:web:084093f158d1de9339de1a",
-    measurementId: "G-8KQZ45QPVP"
+    apiKey: "",
+    authDomain: "",
+    databaseURL: "",
+    projectId: "",
+    storageBucket: "",
+    messagingSenderId: "",
+    appId: "1:",
+    measurementId: ""
 };
 
 // Firebaseの初期化
@@ -820,7 +820,7 @@ const summaryTableContainer = document.getElementById('summaryTableContainer');
 summaryTableContainer.parentNode.insertBefore(formContainer, summaryTableContainer);
 
 async function fetchAerialView(lat, lng) {
-    const apiKey = "AIzaSyDO-oSBQ_9smffiOepTecZJyXlydEsfpgs";
+    const apiKey = "YOURKEY";
     const url = `https://maps.googleapis.com/maps/api/streetview?size=600x400&location=${lat},${lng}&fov=80&heading=70&pitch=0&key=${apiKey}`;
     
     try {
