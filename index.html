@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Emergency Reporting Tool</title>
+    <link rel="stylesheet" href="css/sample.css">
+    <script src="js/sample.js" type="module"></script>
+    <style>
+    .gray-button {
+        width: 100%; /* ボタンの幅を100%に設定 */
+        max-width: 300px; /* 最大幅を設定（必要に応じて調整） */
+        padding: 10px;
+        background-color: #ccc;
+        border: none;
+        cursor: pointer;
+    }
+    </style>
+</head>
+<body>
+    <header>
+        災害情報集約アプリ
+    </header>
+
+    <main>
+        <div class="content-wrapper">
+            <div class="left-content">
+                <div class="button-container">
+                    <button class="toggle-form-button" onclick="toggleForm()">新規被害を投稿</button>
+                    <button class="gray-button" id="viewDamageButton" onclick="scrollToElement('summaryContainer')">地区ごとの被害状況を見る</button>
+                    <button class="gray-button" onclick="scrollToElement('damageReportContainer')">投稿された被害情報を見る</button>
+                    <div class="info-banner">
+                        ※被害情報投稿集約表の「緯度/経度」にカーソルを合わせてストリートビューを下に表示
+                    </div>
+                    <div id="aerialViewContainer" style="display: none;">
+                        <h3>緯度/経度のStreet View（カーソルを合わせた時だけ表示）</h3>
+                        <div id="aerialViewImage"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="right-content">
+                <iframe src="https://www.nhk.or.jp/kishou-saigai/pref/list/shizuoka/#top" title="NHK防災・災害情報" style="height: 600px;"></iframe>
+            </div>
+            <div class="left-content">
+                <iframe width="100" height="50" src="https://www.youtube.com/embed/onVXd9xGmGM?autoplay=1&mute=1" title="YouTube Video" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            </div>
+        </div>
+
+        <!-- 新規投稿フォーム -->
+        <div id="newPostForm">
+            <h2>新規被害投稿フォーム</h2>
+            <form id="damageReportForm">
+                <!-- フォームの各フィールドをここに追加 -->
+            </form>
+        </div>
+
+        <!-- フォームをここに移動 -->
+        <div class="form-container" style="display: none;">
+            <form id="emergencyForm">
+                <!-- フォームフィールド -->
+                <label class="required">名前（カタカナ）</label>
+                <input type="text" id="katakanaName" required>
+
+                <label class="required">名前（漢字）</label>
+                <input type="text" id="kanjiName" required>
+
+                <label class="required">所属機関</label>
+                <input type="text" id="organization" required>
+
+                <label class="required">所属部署名</label>
+                <input type="text" id="department" required>
+
+                <label class="required">役職名</label>
+                <input type="text" id="position" required>
+
+                <label class="required">連絡先電話番号</label>
+                <input type="tel" id="phone" required>
+
+                <label class="required">メールアドレス</label>
+                <input type="email" id="email" required>
+
+                <label class="required">事態発生場所近隣目印</label>
+                <input type="text" id="landmark" required>
+
+                <label class="required">事態種別</label>
+                <select id="incidentType" required>
+                    <option value="">選択してください</option>
+                    <option value="要救助者あり">要助者あり</option>
+                    <option value="家屋被害">家屋被害</option>
+                    <option value="インフラ被害">インフラ被害</option>
+                    <option value="その他">その他</option>
+                </select>
+
+                <div id="rescueDetails" style="display: none;">
+                    <label id="peopleLabel" class="required">人数</label>
+                    <input type="number" id="peopleCount">
+                    <input type="checkbox" id="unknownPeople"> 人数不明・複数人
+                </div>
+
+                <label class="required">発生場所</label>
+                <select id="area" required>
+                    <option value="">選択してください</option>
+                    <option value="相玉">下田市相玉</option>
+                    <option value="朝日町">下田市朝日町</option>
+                    <option value="一丁目">下田市一丁目</option>
+                    <option value="大賀茂">下田市大賀茂</option>
+                    <option value="河内">下田市河内</option>
+                    <option value="敷根">下田市敷根</option>
+                    <option value="須崎">下田市須崎</option>
+                    <option value="高根">下田市根</option>
+                    <option value="立野">下田市立野</option>
+                    <option value="田牛">下田市田牛</option>
+                    <option value="西中">下田市西中</option>
+                    <option value="東本郷">下田市東本郷</option>
+                    <option value="蓮台寺">下田市蓮台寺</option>
+                    <option value="外ヶ岡">下田市外ヶ岡</option>
+                    <option value="六丁目">下田市六丁目</option>
+                </select>
+
+                <label>住所（つづき）</label>
+                <input type="text" id="address">
+
+                <label>Google Mapリンク</label>
+                <input type="url" id="mapLink" placeholder="google map地図上で詳細場所をクリックしてリンクをコピーしてください">
+
+                <div class="map-container">
+                    <button type="button" id="openMapBtn">【救助が迅速化するため記入推奨】Google Mapで発生場所の緯度・経度を特定する</button>
+                </div>
+
+                <label class="required">現場写真</label>
+                <input type="file" id="photo" accept="image/*" required>
+
+                <label>詳細（100字以内）</label>
+                <textarea id="memo" maxlength="100"></textarea>
+
+                <button type="submit" id="submitBtn" class="disabled" disabled>投稿</button>
+                <button type="button" id="clearBtn">消去</button>
+            </form>
+        </div>
+
+        <!-- 集計表のコンテナ -->
+        <div id="summaryContainer">
+            <button id="summaryToggle" onclick="toggleSummary()">▼ 下田市被害投稿集計表</button>
+            <div id="summaryContent">
+                <div id="summaryTableContainer"></div>
+            </div>
+        </div>
+
+        <!-- CSV抽出ボタンを左端に配置するためのコンテナ -->
+        <div class="button-container left-align">
+            <button id="csvExportBtn" class="csv-export-button" onclick="exportToCSV()">被害情報投稿データ　CSV抽出</button>
+        </div>
+
+        <!-- 被害情報投稿集約表のトグルボタンとコンテナ -->
+        <div id="damageReportContainer">
+            <button id="damageReportToggle" class="toggle-button" onclick="toggleDamageReport()">▼ 被害情報投稿集約表</button>
+            <div id="damageReportTableContainer">
+                <table id="postsTable">
+                    <thead>
+                        <tr>
+                            <th>日時</th>
+                            <th>名前（カタカナ）</th>
+                            <th>名前（漢字）</th>
+                            <th>所属機関</th>
+                            <th>所属部署名</th> 
+                            <th>役職名</th> 
+                            <th>TEL</th> 
+                            <th>MAIL</th> 
+                            <th>事態発生場所近隣目印</th>
+                            <th>事態種別</th>
+                            <th>発生場所</th>
+                            <th>住所（つづき）</th>
+                            <th>緯度/経度</th>
+                            <th>写真</th>
+                            <th>詳細（100字以内）</th>
+                            <th>要救助者人数</th> 
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 投稿内容がここに追加される -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Google Mapsの表示モーダル -->
+        <div id="mapModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div id="map"></div>
+            </div>
+        </div>
+
+        <!-- 画像を表示するためのモーダル -->
+        <div id="imageModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" onclick="closeImageModal()">&times; 画像を閉じる</span>
+                <img id="modalImage" src="" alt="大きな画像" style="width: 100%;">
+            </div>
+        </div>
+
+        <td>
+            <a href="https://www.google.com/maps?q=35.658581,139.745433" class="lat-lng">35.658581,139.745433</a>
+            <button class="route-search-button" onclick="searchRoute(this)">ルートを検索</button>
+        </td>        
+
+        <!-- 画像のセル内にクリックイベントを追加 -->
+        <td>
+            <img src="画像のURL" onclick="openImageModal('画像のURL')" alt="投稿画像" style="width: 50px; cursor: pointer;">
+        </td>
+
+        <script>
+        function openImageModal(imageUrl) {
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            modalImage.src = imageUrl; // クリックした画像のURLを設定
+            modal.style.display = "block"; // モーダルを表示
+        }
+
+        function closeImageModal() {
+            const modal = document.getElementById('imageModal');
+            modal.style.display = "none"; // モーダルを非表示
+        }
+        </script>
+
+        <script>
+        function scrollToElement(elementId) {
+            const element = document.getElementById(elementId);
+            element.scrollIntoView({ behavior: 'smooth' }); // スムーズにスクロール
+        }
+        </script>
+
+        <script>
+        function exportToCSV() {
+            const table = document.getElementById('postsTable');
+            let csvContent = "data:text/csv;charset=utf-8,";
+
+            // テーブルの各行をループ
+            Array.from(table.rows).forEach(row => {
+                const rowData = Array.from(row.cells).map(cell => cell.innerText).join(",");
+                csvContent += rowData + "\r\n"; // 行をCSV形式で追加
+            });
+
+            // CSVファイルをダウンロード
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "damage_report.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        </script>
+    </main>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDO-oSBQ_9smffiOepTecZJyXlydEsfpgs&libraries=places"></script>
+   
+    <script>
+    function toggleDamageReport() {
+        const damageReportTableContainer = document.getElementById('damageReportTableContainer');
+        // 集約表の表示/非表示を切り替え
+        if (damageReportTableContainer.style.display === "none") {
+            damageReportTableContainer.style.display = "block"; // 表示
+        } else {
+            damageReportTableContainer.style.display = "none"; // 非表示
+        }
+    }
+
+    function toggleSummary() {
+        const summaryContent = document.getElementById('summaryContent');
+        // 集計表の表示/非表示を切り替え
+        if (summaryContent.style.display === "block") {
+            summaryContent.style.display = "none"; // 非表示
+        } else {
+            summaryContent.style.display = "block"; // 表示
+        }
+    }
+    </script>
+</body>
+</html>
